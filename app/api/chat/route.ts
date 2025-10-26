@@ -1,44 +1,63 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const UAGENT_ADDRESS = 'agent1qdhaqxdvjhtchfmra6ycwjt7p3dj7ucq2ccnx2ppk4pa5mde4kc0ghep43j';
+// Get configuration from environment variables
+const UAGENT_ADDRESS = process.env.UAGENT_ADDRESS || 'agent1qg74awmzslm46e84rhucndmpsjesxcdajxgkxh9ghwagge3h2md8575zqlf';
+const AGENTVERSE_TOKEN = process.env.AGENTVERSE_TOKEN || '';
+const USER_SEED = process.env.USER_SEED || '';
 
-let clientInstance: any = null;
+const clientInstances = new Map<string, any>();
 
-async function getClient() {
-  if (!clientInstance) {
+async function getClient(seed: string, token: string) {
+  if (!clientInstances.has(seed)) {
     const UAgentClientModule = await import('uagent-client');
     const UAgentClient = UAgentClientModule.default || UAgentClientModule;
     
-    clientInstance = new (UAgentClient as any)({
+    const config: any = {
       timeout: 60000,
-      autoStartBridge: true
-    });
+      autoStartBridge: false,
+      userSeed: seed,
+      agentverseToken: token
+    };
     
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    const client = new (UAgentClient as any)(config);
+    await client.createUserBridge(seed, token);
+    
+    clientInstances.set(seed, client);
+    await new Promise(resolve => setTimeout(resolve, 3000));
   }
-  return clientInstance;
+  
+  return clientInstances.get(seed);
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const { message } = await request.json();
+    const { message, userSeed, agentverseToken } = await request.json();
 
     if (!message || typeof message !== 'string') {
-      return NextResponse.json(
-        { error: 'Invalid message' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid message' }, { status: 400 });
     }
     
-    const client = await getClient();
+    console.log('📨 Received message:', message);
+    
+    const seed = userSeed || USER_SEED;
+    const token = agentverseToken || AGENTVERSE_TOKEN;
+    
+    console.log('🔧 Using config - UAGENT:', UAGENT_ADDRESS.substring(0, 20) + '...');
+    console.log('🔧 Seed:', seed.substring(0, 8) + '...');
+    
+    const client = await getClient(seed, token);
+    console.log('✅ Client ready, querying agent...');
+    
     const result = await client.query(UAGENT_ADDRESS, message);
 
     if (result.success) {
+      console.log('✅ Query successful');
       return NextResponse.json({ 
         response: result.response,
         success: true 
       });
     } else {
+      console.error('❌ Query failed:', result.error);
       return NextResponse.json({ 
         response: 'I apologize, but I was unable to process your request at this time.',
         success: false,
@@ -46,6 +65,7 @@ export async function POST(request: NextRequest) {
       });
     }
   } catch (error) {
+    console.error('🚨 Chat API error:', error);
     return NextResponse.json(
       { 
         response: 'An error occurred while processing your request.',
