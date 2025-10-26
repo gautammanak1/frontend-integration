@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 // Get configuration from environment variables
-const UAGENT_ADDRESS = process.env.UAGENT_ADDRESS || 'agent1qg74awmzslm46e84rhucndmpsjesxcdajxgkxh9ghwagge3h2md8575zqlf';
+const UAGENT_ADDRESS = process.env.UAGENT_ADDRESS || '';
 const AGENTVERSE_TOKEN = process.env.AGENTVERSE_TOKEN || '';
 const USER_SEED = process.env.USER_SEED || '';
 
