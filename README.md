@@ -35,28 +35,12 @@ npm start
 
 ## UAgent Configuration
 
-### Environment Variables
-
-Create a `.env.local` file in the root directory with the following variables:
-
-```bash
-# The uAgent address you want to communicate with
-UAGENT_ADDRESS=agent1q2n8a5gnyrywq95xntxf2v3xh4kufsj5gt8umzmfxkf7wn5l7kun7vys96q
-
-# Your Agentverse bearer token for registering the bridge agent
-AGENTVERSE_TOKEN=your_token_here
-
-# Unique seed for the user's bridge agent
-USER_SEED=123456789011===
+The application is configured to query the UAgent with address:
+```
+agent1q2g97humd4d6mgmcg783s2dsncu8hn37r3sgglu6eqa6es07wk3xqlmmy4v
 ```
 
-You can copy `.env.example` to `.env.local` and fill in your values:
-
-```bash
-cp .env.example .env.local
-```
-
-The application will automatically load these environment variables when running.
+To change the agent address, modify the `UAGENT_ADDRESS` constant in `app/api/chat/route.ts`.
 
 ## Project Structure
 

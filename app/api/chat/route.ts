@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Get configuration from environment variables
-const UAGENT_ADDRESS = process.env.UAGENT_ADDRESS || '';
-const AGENTVERSE_TOKEN = process.env.AGENTVERSE_TOKEN || '';
-const USER_SEED = process.env.USER_SEED || '';
+const UAGENT_ADDRESS = 'agent1q2n8a5gnyrywq95xntxf2v3xh4kufsj5gt8umzmfxkf7wn5l7kun7vys96q';
+const AGENTVERSE_TOKEN = 'eyJhbGciOiJSUzI1NiJ9.eyJleHAiOjE3NjMzMTg5MjksImdycCI6ImludGVybmFsIiwiaWF0IjoxNzU1NTQyOTI5LCJpc3MiOiJmZXRjaC5haSIsImp0aSI6IjAyYWNiMzlmODdmZTE3MDIyMTc3NjE2YSIsInNjb3BlIjoiYXYiLCJzdWIiOiIxM2JhOWQ2NTk1MmFhZmUyMTJiOTAxN2UwMDBkNWVlY2ZkZjFkYTdlNGI1NGYzMjkifQ.gEn4deBjj570CeFU_qM-R9GhGOMkeJYISopwBQX9Va9vtaGsBQDj7M0LyLbC-yqxNkzWifsRqPvc2Q4t0gCCxFKgSnXgk9LxcUXUzkIsjSeiJgBRvNayaqL5iYUtQDY_-UJ195__Yhgh-NWAWqsOysv4r40lggGHzNf9Az9xWjyvrUrmLOZD9HTNmu3f7Fm1Xhts6ETqz2c1WaaRhtpnp508oelPE8A4MuZcL4SPZWP97I424a2PR195IZKOXLaow-gLeo8GqP_CTJR7_k1kQS-O7OlX7i3m6syFvlS0XuswCWbKHmwDR1V3ivuP4kujGlCIWWAtrHAsXdKIk-YpWQ';
+const USER_SEED = '123456789011============';
 
 const clientInstances = new Map<string, any>();
 
@@ -37,27 +36,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid message' }, { status: 400 });
     }
     
-    console.log('📨 Received message:', message);
-    
-    const seed = userSeed || USER_SEED;
-    const token = agentverseToken || AGENTVERSE_TOKEN;
-    
-    console.log('🔧 Using config - UAGENT:', UAGENT_ADDRESS.substring(0, 20) + '...');
-    console.log('🔧 Seed:', seed.substring(0, 8) + '...');
-    
-    const client = await getClient(seed, token);
-    console.log('✅ Client ready, querying agent...');
+    const client = await getClient(
+      userSeed || USER_SEED,
+      agentverseToken || AGENTVERSE_TOKEN
+    );
     
     const result = await client.query(UAGENT_ADDRESS, message);
 
     if (result.success) {
-      console.log('✅ Query successful');
       return NextResponse.json({ 
         response: result.response,
         success: true 
       });
     } else {
-      console.error('❌ Query failed:', result.error);
       return NextResponse.json({ 
         response: 'I apologize, but I was unable to process your request at this time.',
         success: false,
@@ -65,7 +56,6 @@ export async function POST(request: NextRequest) {
       });
     }
   } catch (error) {
-    console.error('🚨 Chat API error:', error);
     return NextResponse.json(
       { 
         response: 'An error occurred while processing your request.',
