@@ -4,9 +4,10 @@ FROM node:18-slim
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies and create python symlink
 RUN apt-get update && apt-get install -y \
     python3 python3-pip gcc g++ \
+    && ln -s /usr/bin/python3 /usr/bin/python \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy package files first
@@ -25,4 +26,4 @@ RUN pip3 install --no-cache-dir --break-system-packages --default-timeout=100 --
 EXPOSE 3000
 
 # Start both the bridge agent and Next.js application
-CMD ["sh", "-c", "python3 node_modules/uagent-client/bridge_agent.py & npm run dev"]
+CMD ["sh", "-c", "if [ -f node_modules/uagent-client/bridge_agent.py ]; then python3 node_modules/uagent-client/bridge_agent.py & fi && npm run dev"]
